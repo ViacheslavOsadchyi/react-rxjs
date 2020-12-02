@@ -2,10 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b54846b3-4cf6-4fb1-909a-67e08f6456d2" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Display/Display.stylesheet.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/Display/index.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/services/displayScreenService.js" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../../operation-screen/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../../operation-screen/.idea/vcs.xml" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../../operation-screen/src/actions/displayScreenActions.js" afterDir="false" />
@@ -225,12 +221,12 @@
       <workItem from="1606911120802" duration="7057000" />
       <workItem from="1606919364565" duration="4915000" />
       <workItem from="1606924292837" duration="3010000" />
-      <workItem from="1606927482930" duration="454000" />
+      <workItem from="1606927482930" duration="712000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="20949000" />
+    <option name="totallyTimeSpent" value="21207000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
