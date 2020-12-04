@@ -1,61 +1,67 @@
 import {BehaviorSubject, combineLatest, timer} from "rxjs";
-import {map, pairwise, withLatestFrom, skip} from 'rxjs/operators';
+import {map, skipWhile, withLatestFrom} from 'rxjs/operators';
 
 class DisplayScreenService {
-    provideIndexes(observable) {
-        return observable.pipe(map((value, index) => {
-            return {
-                value,
-                index,
-            }
-        }));
+
+    timeWhenDataConsideredToBeRelavant = 1000;
+    timeStepToUpdateScreen = 100;
+
+    provideTime(observable$) {
+       return observable$.pipe(map(val => {
+           const date = new Date();
+           return {
+               val,
+               dateTime: date,
+           }
+       }))
     }
 
-    provideFresh(indexedObservable) {
-        return combineLatest([indexedObservable, timer( 1000, 1000).pipe(map((value, index) => {
-                return {
-                    timerValue: value,
-                    timerIndex: index,
-                }
-            }))]
-        ).pipe(
-            map(([valueIndexed, timerIndexed]) => {
-                return {
-                    valueIndexed,
-                    timerIndexed,
-                }
-            }),
-            pairwise(),
-            map(([prev, curr]) => {
-                // if timer instance is changed (one second passed) but value instance stays the same
-                if ((curr.timerIndexed.timerIndex !== prev.timerIndexed.timerIndex) && (curr.valueIndexed.index === prev.valueIndexed.index)) {
-                    return 'N/A';
-                } else {
-                    return curr.valueIndexed.value;
-                }
-            })
-        );
+    addTimer(observable$) {
+        const observableWithTime$ = this.provideTime(observable$);
+        const timerWithTime$ = this.provideTime(timer(0,this.timeWhenDataConsideredToBeRelavant));
+        return combineLatest([observableWithTime$, timerWithTime$]).pipe(map(([source, timer]) => {
+            return {
+                value: source.val,
+                wasPushed: source.dateTime,
+                lastTick: timer.dateTime,
+            }
+        }))
+    }
+
+    provideFresh(observable$) {
+        return observable$.pipe(map((source) => {
+            const diffTime = Math.abs(source.wasPushed - source.lastTick);
+            if (diffTime > this.timeWhenDataConsideredToBeRelavant) {
+                return 'N/A';
+            } else {
+                return source.value;
+            }
+        }))
     }
 
     constructor() {
-        this._temperature$ = new BehaviorSubject('');
-        this._airPressure$ = new BehaviorSubject('');
-        this._humidity$ = new BehaviorSubject('');
 
-        // to skip empty (initial) values
-        this.temperature$ = this._temperature$.asObservable().pipe(skip(0));
-        this.airPressure$ = this._airPressure$.asObservable().pipe(skip(0));
-        this.humidity$ = this._humidity$.asObservable().pipe(skip(0));
+        this._temperature$ = new BehaviorSubject();
+        this._airPressure$ = new BehaviorSubject();
+        this._humidity$ = new BehaviorSubject();
 
-        this.temperatureWithIndexes$ = this.provideIndexes(this.temperature$);
-        this.airPressureWithIndexes$ = this.provideIndexes(this.airPressure$);
-        this.humidityWithIndexes$ = this.provideIndexes(this.humidity$);
+        this.temperature$ = this._temperature$.asObservable();
+        this.airPressure$ = this._airPressure$.asObservable();
+        this.humidity$ = this._humidity$.asObservable();
 
-        this.temperatureFresh$ = this.provideFresh(this.temperatureWithIndexes$);
-        this.airPressureFresh$ = this.provideFresh(this.airPressureWithIndexes$);
-        this.humidityFresh$ = this.provideFresh(this.humidityWithIndexes$);
+        this.temperatureWithTimer$ = this.addTimer(this.temperature$);
+        this.airPressureWithTimer$ = this.addTimer(this.airPressure$);
+        this.humidityWithTimer$ = this.addTimer(this.humidity$);
 
-        this.displayObject$ = combineLatest([this.temperatureFresh$, this.airPressureFresh$, this.humidityFresh$]).pipe(map(([temperature, airPressure, humidity]) => {
+        this.temperatureFresh$ = this.provideFresh(this.temperatureWithTimer$);
+        this.airPressureFresh$ = this.provideFresh(this.airPressureWithTimer$);
+        this.humidityFresh$ = this.provideFresh(this.humidityWithTimer$);
+
+        this.displayObjectNotEmpty$ = combineLatest([this.temperatureFresh$, this.airPressureFresh$, this.humidityFresh$]).pipe(skipWhile(params => {
+            return params.indexOf(undefined) !== -1;
+        }));
+
+        this.displayObject$ = this.displayObjectNotEmpty$.pipe(map(([temperature, airPressure, humidity]) => {
             return {
                 temperature,
                 airPressure,
@@ -63,7 +69,7 @@ class DisplayScreenService {
             };
         }));
 
-        this.displayObjectStepped$ = timer(100, 100).pipe(
+        this.displayObjectStepped$ = timer(0, this.timeStepToUpdateScreen).pipe(
             withLatestFrom(this.displayObject$),
             map(([timer, displayObject]) => displayObject));
     }

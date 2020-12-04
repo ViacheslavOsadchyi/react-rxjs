@@ -13,22 +13,23 @@ export default function Display(props) {
     useEffect(() => {
         // subscriptions
         displayScreenService.displayObjectStepped$.subscribe(displayObject => {
+            // console.log('display object ***', displayObject);
             updateDisplayScreen(displayObject);
         });
         // \subscriptions
 
         // trigger events
         // temprature update
-        displayScreenService.setTemperature('36');
-        setTimeout(() => {
-            displayScreenService.setTemperature('82');
-        }, 4000);
+        displayScreenService.setTemperature('35');
         setTimeout(() => {
             displayScreenService.setTemperature('36');
-        }, 4500);
+        }, 2400);
         setTimeout(() => {
-            displayScreenService.setTemperature('72');
-        }, 4800);
+            displayScreenService.setTemperature('37');
+        }, 3200);
+        setTimeout(() => {
+            displayScreenService.setTemperature('38');
+        }, 3900);
 
         // airPressure update
         setTimeout(() => {
@@ -50,7 +51,7 @@ export default function Display(props) {
                         <div className="displayScreen__paramLabel">
                             Temperature
                         </div>
-                        <div className="displayScreen__paramValue">
+                        <div className="displayScreen__paramValue" data-testid="temperature">
                             {displayScreen.temperature}
                         </div>
                     </div>
@@ -58,7 +59,7 @@ export default function Display(props) {
                         <div className="displayScreen__paramLabel">
                             Air pressure
                         </div>
-                        <div className="displayScreen__paramValue">
+                        <div className="displayScreen__paramValue" data-testid="airPressure">
                             {displayScreen.airPressure}
                         </div>
                     </div>
@@ -66,7 +67,7 @@ export default function Display(props) {
                         <div className="displayScreen__paramLabel">
                             Humidity
                         </div>
-                        <div className="displayScreen__paramValue">
+                        <div className="displayScreen__paramValue" data-testid="humidity">
                             {displayScreen.humidity}
                         </div>
                     </div>
